@@ -1,0 +1,16 @@
+{
+  "name": "fullstack_open_part_3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "echo \\\\\\\"Error: no test specified\\\\\\\" && exit 1"
+  },
+  "author": "Kenedy GrooveDev",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
