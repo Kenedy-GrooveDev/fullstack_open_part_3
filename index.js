@@ -1,21 +1,22 @@
-require('dotenv').config()
+require("dotenv").config();
 const express = require("express");
-const Person = require('./models/person')
+const Person = require("./models/person");
 const morgan = require("morgan");
+const person = require("./models/person");
 
 const app = express();
 
-app.use(express.static("dist"))
+app.use(express.static("dist"));
 app.use(express.json());
-morgan.token('body', req => JSON.stringify(req.body))
+morgan.token("body", (req) => JSON.stringify(req.body));
 app.use(
   morgan(":method :url :status :res[content-length] :response-time ms - :body")
 );
 
 app.get("/api/persons", (request, response) => {
-  Person.find({}).then(persons => {
-    response.json(persons)
-  })
+  Person.find({}).then((persons) => {
+    response.json(persons);
+  });
 });
 
 app.get("/api/info", (request, response) => {
@@ -45,11 +46,11 @@ const generateIDs = () => {
 app.post("/api/persons/", (request, response) => {
   const body = request.body;
 
-  const person = {
-    id: generateIDs(),
-    name: body.name,
-    number: body.number,
-  };
+  // const person = {
+  //   id: generateIDs(),
+  //   name: body.name,
+  //   number: body.number,
+  // };
 
   if (!body.name || !body.number) {
     return response.status(400).json({
@@ -57,7 +58,16 @@ app.post("/api/persons/", (request, response) => {
     });
   }
 
-  const name = persons.find((person) => person.name === body.name);
+  let allContacts = [];
+  const getContacts = async () =>
+    await Person.find({}).then((persons) => {
+      allContacts = { ...allContacts, persons };
+      console.log(allContacts);
+    });
+
+  const name = allContacts.find((person) => person.name === body.name);
+
+  console.log(name);
 
   if (name) {
     return response.status(409).json({
@@ -65,9 +75,14 @@ app.post("/api/persons/", (request, response) => {
     });
   }
 
-  persons = persons.concat(person);
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  });
 
-  response.json(person);
+  person.save().then((result) => {
+    response.json(result);
+  });
 });
 
 const PORT = process.env.PORT || 3001;
