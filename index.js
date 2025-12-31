@@ -34,44 +34,25 @@ app.get("/api/persons/:id", (request, response) => {
 
 app.delete("/api/persons/:id", (request, response) => {
   const id = request.params.id;
-  persons = persons.filter((person) => person.id !== id);
-  response.status(204).end();
-});
+  Person.findByIdAndDelete(id).then((note) => {
+    if (!note) {
+      return response.status(404).end();
+    }
 
-const generateIDs = () => {
-  const id = Math.floor(Math.random() * 100000000);
-  return id;
-};
+    response.status(204).end()
+
+  }).catch(error => {
+    console.log(error)
+    response.status(500).send({error: "malformated id"})
+  })
+});
 
 app.post("/api/persons/", (request, response) => {
   const body = request.body;
 
-  // const person = {
-  //   id: generateIDs(),
-  //   name: body.name,
-  //   number: body.number,
-  // };
-
   if (!body.name || !body.number) {
     return response.status(400).json({
       error: "name or number missing",
-    });
-  }
-
-  let allContacts = [];
-  const getContacts = async () =>
-    await Person.find({}).then((persons) => {
-      allContacts = { ...allContacts, persons };
-      console.log(allContacts);
-    });
-
-  const name = allContacts.find((person) => person.name === body.name);
-
-  console.log(name);
-
-  if (name) {
-    return response.status(409).json({
-      error: "name must be unique",
     });
   }
 
@@ -84,6 +65,12 @@ app.post("/api/persons/", (request, response) => {
     response.json(result);
   });
 });
+
+const unknownEndPoint = (request, response) => {
+  return response.status(404).json({error: "unknown endpoint"})
+}
+
+app.use(unknownEndPoint)
 
 const PORT = process.env.PORT || 3001;
 
