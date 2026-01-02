@@ -26,10 +26,16 @@ app.get("/api/info", (request, response) => {
     `);
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
-  const person = persons.find((person) => person.id === id);
-  person ? response.json(person) : response.status(404).end();
+
+  Person.findById(id).then((person) => {
+    if (!person) {
+      return response.status(404).json({ error: "person not found" }).end;
+    }
+
+    response.json(person);
+  });
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
@@ -72,6 +78,10 @@ app.put("/api/persons/:id", (request, response, next) => {
 
   Person.findById(id)
     .then((person) => {
+      if (!person) {
+        return response.status(404).json({ error: "person not found" }).end;
+      }
+
       person.name = name;
       person.number = number;
 
